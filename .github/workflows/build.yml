@@ -1,0 +1,58 @@
+name: Build Coin Blaster Run
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android Project
+        run: |
+          unzip -o CoinBlasterRun_GitHub_AutoBuild-1.zip -d project
+          cd project
+
+          PROJECT_DIR=$(find . -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) | head -n 1)
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "Android project not found"
+            exit 1
+          fi
+
+          echo "Project found: $PROJECT_DIR"
+          echo "PROJECT_DIR=$(dirname "$PROJECT_DIR")" >> "$GITHUB_ENV"
+
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Build APK and AAB
+        run: |
+          cd project/"$PROJECT_DIR"
+          gradle assembleDebug bundleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CoinBlasterRun-APK
+          path: project/**/build/outputs/apk/**/*.apk
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: CoinBlasterRun-AAB
+          path: project/**/build/outputs/bundle/**/*.aab
