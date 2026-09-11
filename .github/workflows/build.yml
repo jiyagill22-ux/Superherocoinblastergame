@@ -43,11 +43,16 @@ jobs:
       - name: Build APK and AAB
         run: |
           cd project/"$PROJECT_DIR"
-          gradle assembleDebug bundleRelease --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
+          echo "android.useAndroidX=true"
+          >> gradle.properties
+          echo
+          "android.enableJetifier=true" >>
+          gradle.properties
+          gradle assembleDebug 
+          bundleRelease --no-daemon
+          - name: Upload APK
+           uses: actions/upload-artifact@v4
+           with:
           name: CoinBlasterRun-APK
           path: project/**/build/outputs/apk/**/*.apk
 
