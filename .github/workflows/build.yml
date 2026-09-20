@@ -1,3 +1,4 @@
+
 name: Build Coin Blaster Run
 
 on:
@@ -27,7 +28,8 @@ jobs:
 
       - name: Find Android Project
         run: |
-          PROJECT_DIR=$(find project -name settings.gradle -type f -printf '%h\n' | head -1)
+          SETTINGS=$(find project -type f -name settings.gradle | head -n 1)
+          PROJECT_DIR=$(dirname "$SETTINGS")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Project found: $PROJECT_DIR"
 
@@ -54,3 +56,4 @@ jobs:
         with:
           name: CoinBlasterRun-AAB
           path: '**/build/outputs/bundle/**/*.aab'
+
